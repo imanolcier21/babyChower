@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tu Invitación · Baby Shower de Abilene 🐠</title>
+  <meta name="description" content="Confirma tu asistencia al baby shower de Abilene Lara Mendieta">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="honey-bar"></div>
+  <div class="drips-container" id="dripsContainer"></div>
+
+  <div class="invite-wrap">
+    <div class="invite-card" id="inviteCard">
+
+      <!-- LOADING -->
+      <div id="stateLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p style="color:var(--text-med);">Cargando tu invitación...</p>
+      </div>
+
+      <!-- ERROR -->
+      <div id="stateError" class="error-state" style="display:none;">
+        <span class="error-icon">🍯</span>
+        <h2 style="font-family:'Quicksand',sans-serif;color:var(--brown);margin-bottom:8px;">
+          Invitación no encontrada
+        </h2>
+        <p style="color:var(--text-med);font-size:.95rem;margin-bottom:24px;">
+          Este link no es válido o ya expiró. Comunícate con nosotros para obtener tu invitación.
+        </p>
+        <a href="/" class="btn btn-outline">← Página principal</a>
+      </div>
+
+      <!-- RSVP FORM -->
+      <div id="stateForm" style="display:none;">
+        <span class="bear">🐠</span>
+        <p class="invite-sub-event">Baby Shower · Abilene Lara Mendieta</p>
+        <h1 class="invite-greeting" id="guestName">¡Hola!</h1>
+        <p style="font-size:.85rem;color:var(--text-light);margin-bottom:4px;">📅 Sábado 13 de Junio · 2026</p>
+        <p class="invite-slots">
+          Tienes <strong id="maxSlots">1</strong> lugar<span id="slotsPlural"></span> reservado<span id="slotsPluralR"></span> para ti 🎀
+        </p>
+
+        <p class="selector-label">¿Cuántos van a asistir?</p>
+        <div class="selector">
+          <button class="sel-btn" id="btnMinus" onclick="changeCount(-1)">−</button>
+          <span class="sel-num" id="selCount">1</span>
+          <button class="sel-btn" id="btnPlus" onclick="changeCount(1)">+</button>
+        </div>
+
+        <p class="invite-also-zero">
+          ¿No podrás asistir?
+          <button onclick="setZero()">Confirmar que no iré</button>
+        </p>
+
+        <button class="btn btn-honey btn-lg" id="btnConfirm" onclick="submitRSVP()">
+          🍯 Confirmar Asistencia
+        </button>
+        <p style="font-size:.78rem;color:var(--text-light);margin-top:12px;">
+          Puedes cambiar tu respuesta en cualquier momento antes del evento.
+        </p>
+      </div>
+
+      <!-- ALREADY CONFIRMED -->
+      <div id="stateConfirmed" class="confirmed-state" style="display:none;">
+        <span class="confirmed-icon" id="confirmedIcon">🎉</span>
+        <h2 class="confirmed-title" id="confirmedTitle">¡Asistencia confirmada!</h2>
+        <p class="confirmed-text" id="confirmedText"></p>
+        <div class="confirmed-pill" id="confirmedPill"></div>
+        <br>
+        <button class="btn btn-outline" style="font-size:.85rem;padding:10px 24px;" onclick="showFormAgain()">
+          ✏️ Modificar respuesta
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer mini -->
+  <footer class="footer" style="padding:28px 24px;">
+    <div class="footer-hearts">💙 🧡 🩵</div>
+    <div class="footer-date" style="margin-top:8px;">Baby Shower · Abilene Lara Mendieta · 2026 🍯</div>
+  </footer>
+
+  <script src="/js/invite.js"></script>
+</body>
+</html>

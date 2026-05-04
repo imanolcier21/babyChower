@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Baby Shower Abilene 🐠</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-body">
+
+  <!-- ══ LOGIN ═════════════════════════════════════════════════════ -->
+  <div class="admin-login-wrap" id="loginWrap">
+    <div class="admin-login-card">
+      <span class="bear">🐠</span>
+      <h1>Panel de Admin</h1>
+      <p>Baby Shower · Abilene Lara Mendieta</p>
+      <input class="admin-input" type="password" id="loginPassword"
+             placeholder="Contraseña..." onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn-admin-login" onclick="doLogin()">🐠 Entrar</button>
+      <div class="login-error" id="loginError" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD ══════════════════════════════════════════════════ -->
+  <div class="admin-dashboard" id="dashboard">
+
+    <!-- Header -->
+    <div class="admin-header">
+      <div class="admin-header-title">🐠 Admin · Baby Shower Abilene</div>
+      <div class="admin-header-right">
+        <button class="btn-admin-sm" onclick="openSettings()">⚙️ Configuración</button>
+        <button class="btn-admin-sm danger" onclick="doLogout()">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- Stats -->
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card"><div class="stat-num" id="statTotalGuests">—</div><div class="stat-label">Invitados</div></div>
+        <div class="stat-card blue"><div class="stat-num" id="statTotalSlots">—</div><div class="stat-label">Lugares totales</div></div>
+        <div class="stat-card green"><div class="stat-num" id="statConfirmed">—</div><div class="stat-label">Confirmados</div></div>
+        <div class="stat-card pink"><div class="stat-num" id="statPending">—</div><div class="stat-label">Sin responder</div></div>
+        <div class="stat-card"><div class="stat-num" id="statConfirmedSlots">—</div><div class="stat-label">Personas confirmadas</div></div>
+      </div>
+
+      <!-- Base URL banner -->
+      <div class="url-banner">
+        <span>🌐 URL base para links:</span>
+        <strong id="baseUrlDisplay">No configurado</strong>
+        <button class="btn-set-url" onclick="openSettings()">Configurar</button>
+      </div>
+
+      <!-- Add guest form -->
+      <div class="add-form-section">
+        <div class="add-form-title">➕ Agregar invitado</div>
+        <div class="add-form-grid">
+          <div class="form-field">
+            <label>Nombre completo</label>
+            <input class="admin-input" id="addName" placeholder="Nombre del invitado..." style="margin-bottom:0">
+          </div>
+          <div class="form-field">
+            <label>Teléfono (WhatsApp)</label>
+            <input class="admin-input" id="addPhone" placeholder="Ej: 5212345678..." style="margin-bottom:0">
+          </div>
+          <div class="form-field">
+            <label>Lugares asignados</label>
+            <input class="admin-input" id="addMax" type="number" min="1" max="20" value="1" style="margin-bottom:0">
+          </div>
+          <div class="form-field" style="grid-column:1/-1">
+            <label>Notas (opcional)</label>
+            <input class="admin-input" id="addNotes" placeholder="Notas internas..." style="margin-bottom:0">
+          </div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-add-guest" style="width:auto;padding:12px 28px;" onclick="addGuest()">➕ Agregar invitado</button>
+          <span id="addFeedback" style="font-size:.85rem;color:var(--green);display:none;"></span>
+        </div>
+      </div>
+
+      <!-- Guests table -->
+      <div class="guests-section">
+        <div class="guests-header">
+          <div class="guests-title">👥 Lista de invitados</div>
+          <input class="search-input" id="searchInput" placeholder="🔍 Buscar..." oninput="filterGuests()">
+        </div>
+        <div class="table-wrap">
+          <table id="guestsTable">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>Lugares</th>
+                <th>Estado</th>
+                <th>Confirmados</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="guestsBody">
+              <tr><td colspan="6"><div class="empty-state"><span class="ei">🍯</span><br>Cargando...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ SETTINGS MODAL ═════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="settingsModal" style="display:none;">
+    <div class="modal">
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+      <h3>⚙️ Configuración</h3>
+
+      <div class="form-field" style="margin-bottom:20px;">
+        <label style="color:rgba(255,248,231,.5);font-size:.8rem;text-transform:uppercase;letter-spacing:1px;font-weight:600;display:block;margin-bottom:8px;">
+          URL base para los links de invitación
+        </label>
+        <input class="admin-input" id="baseUrlInput" placeholder="ej: http://babychower.duckdns.org:3000" style="margin-bottom:4px;">
+        <p style="font-size:.78rem;color:rgba(255,248,231,.3);">Déjalo vacío para usar la dirección de red local automáticamente.</p>
+      </div>
+
+      <div class="form-field" style="margin-bottom:8px;">
+        <label style="color:rgba(255,248,231,.5);font-size:.8rem;text-transform:uppercase;letter-spacing:1px;font-weight:600;display:block;margin-bottom:8px;">
+          Cambiar contraseña de admin (opcional)
+        </label>
+        <input class="admin-input" id="newPasswordInput" type="password" placeholder="Nueva contraseña (mín. 6 caracteres)..." style="margin-bottom:4px;">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-confirm" onclick="saveSettings()">💾 Guardar</button>
+        <button class="btn-cancel-m" onclick="closeSettings()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ EDIT MODAL ═════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="editModal" style="display:none;">
+    <div class="modal">
+      <button class="modal-close" onclick="closeEdit()">✕</button>
+      <h3>✏️ Editar invitado</h3>
+      <input type="hidden" id="editId">
+      <div class="form-field" style="margin-bottom:12px;">
+        <label style="color:rgba(255,248,231,.5);font-size:.8rem;text-transform:uppercase;letter-spacing:1px;font-weight:600;display:block;margin-bottom:6px;">Nombre</label>
+        <input class="admin-input" id="editName" style="margin-bottom:0">
+      </div>
+      <div class="form-field" style="margin-bottom:12px;">
+        <label style="color:rgba(255,248,231,.5);font-size:.8rem;text-transform:uppercase;letter-spacing:1px;font-weight:600;display:block;margin-bottom:6px;">Teléfono</label>
+        <input class="admin-input" id="editPhone" style="margin-bottom:0">
+      </div>
+      <div class="form-field" style="margin-bottom:12px;">
+        <label style="color:rgba(255,248,231,.5);font-size:.8rem;text-transform:uppercase;letter-spacing:1px;font-weight:600;display:block;margin-bottom:6px;">Lugares asignados</label>
+        <input class="admin-input" id="editMax" type="number" min="1" max="20" style="margin-bottom:0">
+      </div>
+      <div class="form-field" style="margin-bottom:0">
+        <label style="color:rgba(255,248,231,.5);font-size:.8rem;text-transform:uppercase;letter-spacing:1px;font-weight:600;display:block;margin-bottom:6px;">Notas</label>
+        <input class="admin-input" id="editNotes" style="margin-bottom:0">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-confirm" onclick="saveEdit()">💾 Guardar</button>
+        <button class="btn-cancel-m" onclick="closeEdit()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toastContainer"></div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>
