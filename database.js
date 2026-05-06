@@ -2,10 +2,19 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
-const dataDir = path.join(__dirname, 'data');
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir);
+const dataDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
-const db = new Database(path.join(dataDir, 'babychower.db'));
+const dbPath = path.join(dataDir, 'babychower.db');
+
+// Si estamos en Railway y el volumen está vacío, copiar la base de datos original que subimos
+const localDbPath = path.join(__dirname, 'data', 'babychower.db');
+if (process.env.RAILWAY_VOLUME_MOUNT_PATH && !fs.existsSync(dbPath) && fs.existsSync(localDbPath)) {
+  fs.copyFileSync(localDbPath, dbPath);
+  console.log("Base de datos local copiada al volumen persistente de Railway.");
+}
+
+const db = new Database(dbPath);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS guests (
@@ -24,6 +33,12 @@ db.exec(`
     value TEXT NOT NULL
   );
 `);
+
+try {
+  db.exec("ALTER TABLE guests ADD COLUMN host TEXT DEFAULT 'Ambos'");
+} catch (err) {
+  // Column might already exist, ignore error
+}
 
 const adminExists = db.prepare("SELECT value FROM settings WHERE key = 'admin_password'").get();
 if (!adminExists) {
