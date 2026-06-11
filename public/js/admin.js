@@ -57,7 +57,7 @@ async function loadStats() {
 async function loadGuests() {
   const res = await fetch('/api/admin/guests', { headers: authH() });
   allGuests = await res.json();
-  renderTable(allGuests);
+  filterGuests();
 }
 
 async function loadSettings() {
@@ -119,6 +119,7 @@ function renderTable(guests) {
           ${g.notes ? `<div class="guest-phone">📝 ${escHtml(g.notes)}</div>` : ''}
         </td>
         <td><div class="guest-phone">${g.phone ? `📱 ${escHtml(g.phone)}` : '—'}</div></td>
+        <td><div class="guest-phone">${g.host || 'Ambos'}</div></td>
         <td><strong style="color:var(--ocean-pale)">${g.max_guests}</strong></td>
         <td>${statusBadge}</td>
         <td><strong style="color:var(--seagrass)">${confCount}</strong></td>
@@ -136,7 +137,13 @@ function renderTable(guests) {
 // ── Filter ───────────────────────────────────────────────────────
 function filterGuests() {
   const q = document.getElementById('searchInput').value.toLowerCase();
-  renderTable(allGuests.filter(g => g.name.toLowerCase().includes(q) || (g.phone && g.phone.includes(q))));
+  const showDeclined = document.getElementById('showDeclinedCheck').checked;
+  const filtered = allGuests.filter(g => {
+    const matchesQuery = g.name.toLowerCase().includes(q) || (g.phone && g.phone.includes(q));
+    const isDeclined = g.confirmed === 0;
+    return matchesQuery && (showDeclined || !isDeclined);
+  });
+  renderTable(filtered);
 }
 
 // ── Add guest ────────────────────────────────────────────────────
@@ -144,13 +151,14 @@ async function addGuest() {
   const name = document.getElementById('addName').value.trim();
   const phone = document.getElementById('addPhone').value.trim();
   const max_guests = parseInt(document.getElementById('addMax').value) || 1;
+  const host = document.getElementById('addHost').value;
   const notes = document.getElementById('addNotes').value.trim();
   if (!name) { showToast('El nombre es requerido', 'error'); return; }
 
   const res = await fetch('/api/admin/guests', {
     method: 'POST',
     headers: authH(),
-    body: JSON.stringify({ name, phone, max_guests, notes }),
+    body: JSON.stringify({ name, phone, max_guests, notes, host }),
   });
   const data = await res.json();
   if (!res.ok) { showToast(data.error, 'error'); return; }
@@ -158,6 +166,7 @@ async function addGuest() {
   document.getElementById('addName').value = '';
   document.getElementById('addPhone').value = '';
   document.getElementById('addMax').value = '1';
+  document.getElementById('addHost').value = 'Ambos';
   document.getElementById('addNotes').value = '';
 
   showToast(`✅ ${name} agregado`, 'success');
@@ -198,6 +207,7 @@ function openEdit(id) {
   document.getElementById('editName').value = g.name;
   document.getElementById('editPhone').value = g.phone || '';
   document.getElementById('editMax').value = g.max_guests;
+  document.getElementById('editHost').value = g.host || 'Ambos';
   document.getElementById('editNotes').value = g.notes || '';
   document.getElementById('editModal').style.display = '';
 }
@@ -209,11 +219,12 @@ async function saveEdit() {
   const name = document.getElementById('editName').value.trim();
   const phone = document.getElementById('editPhone').value.trim();
   const max_guests = parseInt(document.getElementById('editMax').value);
+  const host = document.getElementById('editHost').value;
   const notes = document.getElementById('editNotes').value.trim();
   const res = await fetch(`/api/admin/guests/${id}`, {
     method: 'PUT',
     headers: authH(),
-    body: JSON.stringify({ name, phone, max_guests, notes }),
+    body: JSON.stringify({ name, phone, max_guests, notes, host }),
   });
   if (res.ok) { showToast('💾 Cambios guardados', 'success'); closeEdit(); loadAll(); }
   else { showToast('Error al guardar', 'error'); }

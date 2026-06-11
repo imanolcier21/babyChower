@@ -208,8 +208,14 @@ function showRsvpSuccess(count) {
   s.style.display = '';
   document.getElementById('rsvpSuccessIcon').textContent  = count > 0 ? '🎉' : '😢';
   document.getElementById('rsvpSuccessTitle').textContent = count > 0 ? '¡Asistencia confirmada!' : 'Nos vemos en otra ocasión';
-  document.getElementById('rsvpSuccessText').textContent  = count > 0
-    ? `¡Qué emoción, ${rsvpGuest.name}! Te esperamos el 13 de Junio 🌊`
+  
+  const amazonLink = "https://www.amazon.com.mx/baby-reg/abilene-lara-junio-2026-jiutepec/1356QXCJCBP6B?ref_=cm_sw_r_apann_dp_1YYK21F87JKS4QM25NMM&language=en-US";
+  
+  document.getElementById('rsvpSuccessText').innerHTML  = count > 0
+    ? `¡Qué emoción, ${rsvpGuest.name}! Te esperamos el 14 de Junio 🌊<br><br>
+       🎁 <strong>Mesa de regalos:</strong> <br>
+       <a href="${amazonLink}" target="_blank" style="color:var(--honey); text-decoration:underline;">Ver en Amazon</a><br><br>
+       <em>✉️ Nota: También habrá "lluvia de sobres" el día del evento por si gustan apoyar a los papás.</em>`
     : `Lamentamos que no puedas asistir, ${rsvpGuest.name}. ¡Habrá otras oportunidades!`;
 }
 

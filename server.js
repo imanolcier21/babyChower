@@ -49,6 +49,26 @@ app.post('/api/rsvp/:token', (req, res) => {
   if (isNaN(num) || num < 0 || num > guest.max_guests)
     return res.status(400).json({ error: `Solo puedes confirmar entre 0 y ${guest.max_guests} personas` });
   db.prepare('UPDATE guests SET confirmed=?, confirmed_at=CURRENT_TIMESTAMP WHERE token=?').run(num, req.params.token);
+  
+  // Enviar notificación a Telegram
+  try {
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+    
+    if (botToken && chatId) {
+      const totalConfirmed = db.prepare('SELECT COALESCE(SUM(confirmed),0) as s FROM guests WHERE confirmed IS NOT NULL').get().s;
+      const text = `🔔 *¡Nueva Confirmación!*\n\nConfirmó *${guest.name}* con *${num}* lugares.\n\n📊 *Resumen actual:*\nLlevas *${totalConfirmed}* confirmados de un límite de *100*.\n\n_(Recuerda que si superas el límite debes solicitar otra mesa)_`;
+      
+      fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' })
+      }).catch(err => console.error("Error enviando Telegram:", err));
+    }
+  } catch (err) {
+    console.error("Error en bloque Telegram:", err);
+  }
+
   res.json({ success: true, confirmed: num });
 });
 
@@ -62,7 +82,7 @@ app.post('/api/admin/login', (req, res) => {
 app.get('/api/admin/stats', adminAuth, (req, res) => {
   const totalGuests    = db.prepare('SELECT COUNT(*) as c FROM guests').get().c;
   const responded      = db.prepare('SELECT COUNT(*) as c FROM guests WHERE confirmed IS NOT NULL').get().c;
-  const totalSlots     = db.prepare('SELECT COALESCE(SUM(max_guests),0) as s FROM guests').get().s;
+  const totalSlots     = db.prepare('SELECT COALESCE(SUM(max_guests),0) as s FROM guests WHERE confirmed IS NULL OR confirmed > 0').get().s;
   const confirmedSlots = db.prepare('SELECT COALESCE(SUM(confirmed),0) as s FROM guests WHERE confirmed IS NOT NULL').get().s;
   res.json({ totalGuests, responded, notResponded: totalGuests - responded, totalSlots, confirmedSlots });
 });
@@ -72,21 +92,21 @@ app.get('/api/admin/guests', adminAuth, (req, res) => {
 });
 
 app.post('/api/admin/guests', adminAuth, (req, res) => {
-  const { name, phone, max_guests, notes } = req.body;
+  const { name, phone, max_guests, notes, host } = req.body;
   if (!name || !max_guests) return res.status(400).json({ error: 'Nombre y cupo son requeridos' });
   const token = uuidv4();
   const result = db.prepare(
-    'INSERT INTO guests (name, phone, max_guests, token, notes) VALUES (?,?,?,?,?)'
-  ).run(name.trim(), phone?.trim() || null, parseInt(max_guests), token, notes?.trim() || null);
+    'INSERT INTO guests (name, phone, max_guests, token, notes, host) VALUES (?,?,?,?,?,?)'
+  ).run(name.trim(), phone?.trim() || null, parseInt(max_guests), token, notes?.trim() || null, host || 'Ambos');
   res.status(201).json(db.prepare('SELECT * FROM guests WHERE id=?').get(result.lastInsertRowid));
 });
 
 app.put('/api/admin/guests/:id', adminAuth, (req, res) => {
-  const { name, phone, max_guests, notes } = req.body;
+  const { name, phone, max_guests, notes, host } = req.body;
   const g = db.prepare('SELECT * FROM guests WHERE id=?').get(req.params.id);
   if (!g) return res.status(404).json({ error: 'No encontrado' });
-  db.prepare('UPDATE guests SET name=?,phone=?,max_guests=?,notes=? WHERE id=?')
-    .run(name?.trim() || g.name, phone?.trim() || null, parseInt(max_guests) || g.max_guests, notes?.trim() || null, req.params.id);
+  db.prepare('UPDATE guests SET name=?,phone=?,max_guests=?,notes=?,host=? WHERE id=?')
+    .run(name?.trim() || g.name, phone?.trim() || null, parseInt(max_guests) || g.max_guests, notes?.trim() || null, host || g.host || 'Ambos', req.params.id);
   res.json(db.prepare('SELECT * FROM guests WHERE id=?').get(req.params.id));
 });
 
@@ -129,7 +149,7 @@ app.listen(PORT, '0.0.0.0', () => {
     iface?.forEach(d => { if (d.family === 'IPv4' && !d.internal) ips.push(d.address); });
   });
   console.log('\n🍯 ══════════════════════════════════════════');
-  console.log('   Baby Shower · Abilene Lara Mendieta ✨');
+  console.log('   Baby Shower · Lucca ✨');
   console.log('════════════════════════════════════════════');
   console.log(`   Local:    http://localhost:${PORT}`);
   ips.forEach(ip => console.log(`   Red WiFi: http://${ip}:${PORT}`));

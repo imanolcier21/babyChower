@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin · Baby Shower Abilene 🐠</title>
+  <title>Admin · Baby Shower Lucca 🐠</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="admin-body">
@@ -13,7 +13,7 @@
     <div class="admin-login-card">
       <span class="bear">🐠</span>
       <h1>Panel de Admin</h1>
-      <p>Baby Shower · Abilene Lara Mendieta</p>
+      <p>Baby Shower · Lucca</p>
       <input class="admin-input" type="password" id="loginPassword"
              placeholder="Contraseña..." onkeydown="if(event.key==='Enter')doLogin()">
       <button class="btn-admin-login" onclick="doLogin()">🐠 Entrar</button>
@@ -26,7 +26,7 @@
 
     <!-- Header -->
     <div class="admin-header">
-      <div class="admin-header-title">🐠 Admin · Baby Shower Abilene</div>
+      <div class="admin-header-title">🐠 Admin · Baby Shower Lucca</div>
       <div class="admin-header-right">
         <button class="btn-admin-sm" onclick="openSettings()">⚙️ Configuración</button>
         <button class="btn-admin-sm danger" onclick="doLogout()">Cerrar sesión</button>
@@ -37,11 +37,11 @@
 
       <!-- Stats -->
       <div class="stats-row" id="statsRow">
-        <div class="stat-card"><div class="stat-num" id="statTotalGuests">—</div><div class="stat-label">Invitados</div></div>
-        <div class="stat-card blue"><div class="stat-num" id="statTotalSlots">—</div><div class="stat-label">Lugares totales</div></div>
-        <div class="stat-card green"><div class="stat-num" id="statConfirmed">—</div><div class="stat-label">Confirmados</div></div>
+        <div class="stat-card"><div class="stat-num" id="statTotalGuests">—</div><div class="stat-label">Grupos / Pases</div></div>
+        <div class="stat-card blue"><div class="stat-num" id="statTotalSlots">—</div><div class="stat-label">Personas Invitadas</div></div>
+        <div class="stat-card green"><div class="stat-num" id="statConfirmed">—</div><div class="stat-label">Pases Confirmados</div></div>
         <div class="stat-card pink"><div class="stat-num" id="statPending">—</div><div class="stat-label">Sin responder</div></div>
-        <div class="stat-card"><div class="stat-num" id="statConfirmedSlots">—</div><div class="stat-label">Personas confirmadas</div></div>
+        <div class="stat-card"><div class="stat-num" id="statConfirmedSlots">—</div><div class="stat-label">Personas Confirmadas</div></div>
       </div>
 
       <!-- Base URL banner -->
@@ -67,6 +67,14 @@
             <label>Lugares asignados</label>
             <input class="admin-input" id="addMax" type="number" min="1" max="20" value="1" style="margin-bottom:0">
           </div>
+          <div class="form-field">
+            <label>Anfitrión (Lista)</label>
+            <select class="admin-input" id="addHost" style="margin-bottom:0; padding:14px 18px; appearance:none;">
+              <option value="Ambos">Ambos</option>
+              <option value="Imanol">Imanol</option>
+              <option value="Abilene">Abilene</option>
+            </select>
+          </div>
           <div class="form-field" style="grid-column:1/-1">
             <label>Notas (opcional)</label>
             <input class="admin-input" id="addNotes" placeholder="Notas internas..." style="margin-bottom:0">
@@ -82,7 +90,13 @@
       <div class="guests-section">
         <div class="guests-header">
           <div class="guests-title">👥 Lista de invitados</div>
-          <input class="search-input" id="searchInput" placeholder="🔍 Buscar..." oninput="filterGuests()">
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:rgba(202,240,248,.6);cursor:pointer;user-select:none;margin:0;">
+              <input type="checkbox" id="showDeclinedCheck" onchange="filterGuests()" style="width:16px;height:16px;accent-color:var(--ocean-light);">
+              Mostrar no asistentes
+            </label>
+            <input class="search-input" id="searchInput" placeholder="🔍 Buscar..." oninput="filterGuests()">
+          </div>
         </div>
         <div class="table-wrap">
           <table id="guestsTable">
@@ -90,6 +104,7 @@
               <tr>
                 <th>Nombre</th>
                 <th>Teléfono</th>
+                <th>Anfitrión</th>
                 <th>Lugares</th>
                 <th>Estado</th>
                 <th>Confirmados</th>
@@ -151,6 +166,14 @@
       <div class="form-field" style="margin-bottom:12px;">
         <label style="color:rgba(255,248,231,.5);font-size:.8rem;text-transform:uppercase;letter-spacing:1px;font-weight:600;display:block;margin-bottom:6px;">Lugares asignados</label>
         <input class="admin-input" id="editMax" type="number" min="1" max="20" style="margin-bottom:0">
+      </div>
+      <div class="form-field" style="margin-bottom:12px;">
+        <label style="color:rgba(255,248,231,.5);font-size:.8rem;text-transform:uppercase;letter-spacing:1px;font-weight:600;display:block;margin-bottom:6px;">Anfitrión</label>
+        <select class="admin-input" id="editHost" style="margin-bottom:0; padding:14px 18px; appearance:none;">
+          <option value="Ambos">Ambos</option>
+          <option value="Imanol">Imanol</option>
+          <option value="Abilene">Abilene</option>
+        </select>
       </div>
       <div class="form-field" style="margin-bottom:0">
         <label style="color:rgba(255,248,231,.5);font-size:.8rem;text-transform:uppercase;letter-spacing:1px;font-weight:600;display:block;margin-bottom:6px;">Notas</label>
